@@ -1,4 +1,14 @@
 # super-bulles
+## Structure du projet
+
+main.c                      → point d'entrée, init Allegro, menu
+jeu.c / jeu.h               → boucle de jeu, logique globale, niveaux
+entites.c / entites.h       → joueur, bulles, projectiles
+collision.c / collision.h   → détection des collisions
+affichage.c / affichage.h   → rendu graphique Allegro 4
+input.c / input.h           → clavier, actions du joueur
+sauvegarde.c / sauvegarde.h → lecture/écriture fichier
+
 ## 📋 Workflow pour l'équipe
 
 ### Avant de commencer à coder
