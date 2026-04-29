@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:\\MinGW avec Allegro 4\\MinGW\\include",
+                "C:\\MinGW avec Allegro 4\\MinGW\\include\\allegro"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "WIN32"
+            ],
+            "cStandard": "c17",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "C:\\MinGW avec Allegro 4\\MinGW\\bin\\gcc.exe"
+        }
+    ],
+    "version": 4
+}
