@@ -14,7 +14,6 @@
 #include <allegro.h> /* Nécessaire pour les constantes clavier */
 #include "entites.h" /* Nécessaire pour Joueur et Projectile */
 
-void lireEntrees(Joueur *j, Projectile *proj, int *quitter, float dt); /* Lit le clavier et met à jour le joueur */
-void saisirPseudo(char *pseudo);                                        /* Permet au joueur de saisir son pseudo */
-
+void lireEntrees(Partie *p, int *quitter, float dt);
+void saisirPseudo(char *pseudo, BITMAP *buffer); /* Saisie du pseudo avec affichage */
 #endif

@@ -8,53 +8,102 @@
  */
 #include "collisions.h" /* On importe les prototypes */
 #include <math.h>       /* Pour sqrt() */
+#include <allegro.h>    /* Pour SCREEN_H */
 
+/* ===== COLLISION ENTRE DEUX CERCLES ===== */
 int collisionCercles(float x1, float y1, float r1, float x2, float y2, float r2) {
-    /* Calcule la distance entre les deux centres */
-    float dx = x2 - x1;                        /* Différence en x entre les deux centres */
-    float dy = y2 - y1;                        /* Différence en y entre les deux centres */
-    float distance = sqrt(dx*dx + dy*dy);      /* Distance réelle entre les deux centres */
-    return distance < (r1 + r2);              /* Collision si distance < somme des rayons */
+    float dx = x2 - x1;                   /* Écart horizontal */
+    float dy = y2 - y1;                   /* Écart vertical */
+    float distance = sqrt(dx*dx + dy*dy); /* Distance entre les centres */
+    return distance < (r1 + r2);         /* Vrai si les cercles se touchent */
 }
 
+/* ===== COLLISION ENTRE DEUX RECTANGLES ===== */
 int collisionRectangles(float x1, float y1, float w1, float h1,
                          float x2, float y2, float w2, float h2) {
-    /* Vérifie si les deux rectangles se chevauchent sur les deux axes */
-    if (x1 + w1 < x2) return 0; /* Le rectangle 1 est complètement à gauche du 2 */
-    if (x2 + w2 < x1) return 0; /* Le rectangle 2 est complètement à gauche du 1 */
-    if (y1 + h1 < y2) return 0; /* Le rectangle 1 est complètement au-dessus du 2 */
-    if (y2 + h2 < y1) return 0; /* Le rectangle 2 est complètement au-dessus du 1 */
-    return 1;                    /* Sinon il y a collision */
+    if (x1 + w1 < x2) return 0; /* Rectangle 1 trop à gauche */
+    if (x2 + w2 < x1) return 0; /* Rectangle 2 trop à gauche */
+    if (y1 + h1 < y2) return 0; /* Rectangle 1 trop en haut */
+    if (y2 + h2 < y1) return 0; /* Rectangle 2 trop en haut */
+    return 1;                    /* Les rectangles se touchent */
 }
 
-void gererCollisions(Partie *p) { /* Reçoit tout l'état de la partie */
-    int i;                         /* Variable de boucle */
-    int rayon;                     /* Rayon d'une bulle selon sa taille */
+/* ===== GÉRER TOUTES LES COLLISIONS ===== */
+void gererCollisions(Partie *p) {
+    int i;           /* Variable de boucle pour les bulles */
+    int j;           /* Variable de boucle pour les éclairs */
+    int rayon;       /* Rayon de la bulle */
+    int joueur_haut; /* Position haute du joueur */
 
-    for (i = 0; i < p->nb_bulles; i++) {  /* On parcourt toutes les bulles */
-        if (!p->bulles[i].actif) continue; /* On saute les bulles inactives */
+    joueur_haut = SCREEN_H - 95; /* Haut du joueur */
 
-        rayon = p->bulles[i].taille * 15;  /* Rayon proportionnel à la taille */
+    /* ===== COLLISIONS AVEC LES BULLES ===== */
+    for (i = 0; i < p->nb_bulles; i++) {
+        if (!p->bulles[i].actif) continue; /* On saute les bulles détruites */
 
-        /* Collision tir / bulle (deux cercles) */
-        if (p->proj.actif) { /* On vérifie seulement si un tir est en cours */
-            if (collisionCercles(p->proj.x, p->proj.y, 5,          /* Cercle du projectile (rayon 5) */
-                                 p->bulles[i].x, p->bulles[i].y, rayon)) { /* Cercle de la bulle */
-                p->proj.actif = 0;                    /* Le projectile disparaît */
+        rayon = p->bulles[i].taille * 15;  /* Rayon de la bulle */
+
+        /* Collision tir / bulle */
+        if (p->proj.actif) {
+            if (collisionCercles(
+                    p->proj.x, p->proj.y, 5,
+                    p->bulles[i].x, p->bulles[i].y, rayon)) {
+                p->proj.actif = 0;                         /* Le projectile disparaît */
                 diviserBulle(p->bulles, &p->nb_bulles, i); /* La bulle se divise */
-                p->score += 100 * p->bulles[i].taille; /* On ajoute des points selon la taille */
-            }
+                p->score += 100 * p->bulles[i].taille;     /* On gagne des points */
+                    }
         }
 
-        /* Collision bulle / joueur (cercle / rectangle) */
-        if (p->joueur.vivant) { /* On vérifie seulement si le joueur est en vie */
+        /* Collision bulle / joueur */
+        if (p->joueur.vivant) {
             if (collisionRectangles(
-                    p->bulles[i].x - rayon, p->bulles[i].y - rayon, /* Bounding box de la bulle */
+                    p->bulles[i].x - rayon, p->bulles[i].y - rayon,
                     rayon * 2, rayon * 2,
-                    p->joueur.x - 10, p->joueur.y - 10,             /* Hitbox du joueur */
-                    20, 20)) {
-                p->joueur.vivant = 0; /* Le joueur meurt si une bulle le touche */
-            }
+                    p->joueur.x - 10, joueur_haut,
+                    20, 60)) {
+                p->joueur.vivant = 0; /* Le joueur meurt */
+                    }
+        }
+    }
+
+    /* ===== COLLISIONS AVEC LES ÉCLAIRS ===== */
+    for (j = 0; j < MAX_ECLAIRS; j++) {
+        if (!p->eclairs[j].actif) continue;      /* On saute les inactifs */
+        if (!p->joueur.vivant) break;             /* Inutile si déjà mort */
+        if (p->eclairs[j].x > p->joueur.x - 30 &&  /* Zone plus large */
+        p->eclairs[j].x < p->joueur.x + 30 &&   /* Zone plus large */
+        p->eclairs[j].y > SCREEN_H - 150) {      /* Zone plus haute */ {    /* Au niveau du joueur */
+            p->joueur.vivant = 0;                   /* Le joueur est foudroyé */
+        }
+        }
+
+        /* ===== COLLISIONS AVEC LE BOSS ===== */
+
+        /* Collision tir / boss */
+        if (p->boss.actif && p->proj.actif) {
+            if (collisionCercles(
+                    p->proj.x, p->proj.y, 5,      /* Le projectile */
+                    p->boss.x, p->boss.y, 40)) {   /* Le boss */
+                p->proj.actif = 0;                  /* Le tir disparaît */
+                p->boss.vie--;                       /* Le boss perd une vie */
+                p->score += 500;                     /* On gagne des points */
+                p->boss.etat = BOSS_HURT;           /* Animation de dégâts */
+                p->boss.timer_hurt = 30;            /* Durée de l'état hurt */
+                p->boss.vx = p->boss.vx * 1.3;    /* Le boss va plus vite */
+                if (p->boss.vie <= 0) {
+                    p->boss.etat = BOSS_DIE;        /* Animation de mort */
+                    p->boss.actif = 0;              /* Le boss est vaincu */
+                }
+                    }
+        }
+
+        /* Collision boss / joueur */
+        if (p->boss.actif && p->joueur.vivant) {
+            if (collisionCercles(
+                    p->boss.x, p->boss.y, 40,          /* Le boss */
+                    p->joueur.x, SCREEN_H - 65, 15)) { /* Le joueur */
+                p->joueur.vivant = 0;                   /* Le joueur meurt */
+                    }
         }
     }
 }
