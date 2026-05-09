@@ -7,13 +7,14 @@
  * - Gère la navigation dans les menus
  * - Inclure ce fichier dans jeu.c
  */
-#ifndef INPUT_H       /* Protection contre les inclusions en double */
+
+#ifndef INPUT_H
 #define INPUT_H
 
-#include <allegro.h>  /* On a besoin d'Allegro pour les touches clavier */
-#include "entites.h"  /* On a besoin de la struct Joueur */
+#include <allegro.h> /* Nécessaire pour les constantes clavier */
+#include "entites.h" /* Nécessaire pour Joueur et Projectile */
 
-/* Prototypes */
-void lireEntrees(Joueur *j, Projectile *p, int *quitter); /* Lit le clavier et met à jour le joueur */
+void lireEntrees(Joueur *j, Projectile *proj, int *quitter, float dt); /* Lit le clavier et met à jour le joueur */
+void saisirPseudo(char *pseudo);                                        /* Permet au joueur de saisir son pseudo */
 
 #endif

@@ -6,93 +6,93 @@
  * - Gérer les tirs (créer et déplacer les projectiles)
  * - Gérer la sauvegarde et le chargement des parties
  */
-#include "entites.h"  /* On importe les structs et prototypes définis dans entites.h */
+
+ 
+#include "entites.h" /* On importe les structs et prototypes */
 
 /* ===================== JOUEUR ===================== */
 
-void initialiserJoueur(Joueur *j, float x, float y) {  /* Reçoit un pointeur vers le joueur et sa position de départ */
-    j->x = x;       /* On place le joueur à la position horizontale x */
-    j->y = y;       /* On place le joueur à la position verticale y */
-    j->vivant = 1;  /* Le joueur commence en vie (1 = vivant) */
+Joueur initialiserJoueur(float x, float y) { /* Retourne un Joueur initialisé */
+    Joueur j;      /* On crée un joueur local */
+    j.x = x;      /* Position horizontale de départ */
+    j.y = y;      /* Position verticale de départ */
+    j.vivant = 1; /* Le joueur commence en vie */
+    return j;     /* On retourne le joueur créé */
 }
 
-void deplacerJoueur(Joueur *j, int direction) {        /* direction vaut -1 (gauche) ou 1 (droite) */
-    j->x += direction * VITESSE_JOUEUR;                /* On ajoute ou soustrait la vitesse selon la direction */
-
-    if (j->x < 0) j->x = 0;                           /* Empêche le joueur de sortir par la gauche */
-    if (j->x > LARGEUR_ECRAN) j->x = LARGEUR_ECRAN;   /* Empêche le joueur de sortir par la droite */
+void deplacerJoueur(Joueur *j, int dir, float dt) { /* dt = temps écoulé en secondes */
+    j->x += dir * VITESSE_JOUEUR * dt;              /* Déplacement fluide proportionnel au temps */
+    if (j->x < 0) j->x = 0;                         /* Empêche de sortir par la gauche */
+    if (j->x > LARGEUR_ECRAN) j->x = LARGEUR_ECRAN; /* Empêche de sortir par la droite */
 }
 
 /* ===================== BULLES ===================== */
 
-void initialiserBulle(Bulle *b, float x, float y, int taille) {  /* Reçoit la position et la taille de la bulle à créer */
-    b->x = x;        /* Position horizontale de départ de la bulle */
-    b->y = y;        /* Position verticale de départ de la bulle */
-    b->taille = taille;  /* Taille de la bulle : 3=grande, 2=moyenne, 1=petite */
-    b->actif = 1;    /* La bulle est active dès sa création (1 = visible) */
-    b->vx = 2.0;     /* Vitesse horizontale initiale (vers la droite) */
-    b->vy = -3.0;    /* Vitesse verticale initiale (vers le haut, donc négative) */
+void ajouterBulle(Bulle *tab, int *nb, float x, float y, int taille) { /* Ajoute une bulle à la fin du tableau */
+    if (*nb >= MAX_BULLES) return;   /* Sécurité : on ne dépasse pas le maximum */
+    tab[*nb].x = x;                  /* Position horizontale */
+    tab[*nb].y = y;                  /* Position verticale */
+    tab[*nb].taille = taille;        /* Taille de la bulle */
+    tab[*nb].vx = 2.0 * taille;     /* Vitesse horizontale proportionnelle à la taille */
+    tab[*nb].vy = -3.0 * taille;    /* Vitesse verticale vers le haut */
+    tab[*nb].actif = 1;              /* La bulle est active */
+    (*nb)++;                          /* On incrémente le nombre total de bulles */
 }
 
-void mettreAJourBulles(Bulle bulles[], int nb) {   /* Reçoit le tableau de toutes les bulles et leur nombre */
-    int i;                                          /* Variable de boucle */
-    for (i = 0; i < nb; i++) {                     /* On parcourt toutes les bulles */
-        if (!bulles[i].actif) continue;            /* Si la bulle est inactive on la saute */
-
-        bulles[i].x += bulles[i].vx;              /* On déplace la bulle horizontalement selon sa vitesse */
-        bulles[i].y += bulles[i].vy;              /* On déplace la bulle verticalement selon sa vitesse */
-
-        if (bulles[i].x <= 0 || bulles[i].x >= LARGEUR_ECRAN)  /* Si la bulle touche un bord gauche ou droit... */
-            bulles[i].vx *= -1;                                  /* ...on inverse sa vitesse horizontale (rebond) */
-
-        if (bulles[i].y <= 0)     /* Si la bulle touche le plafond... */
-            bulles[i].vy *= -1;   /* ...on inverse sa vitesse verticale (rebond) */
-
-        bulles[i].vy += 0.05;    /* Gravité légère : la bulle accélère doucement vers le bas à chaque frame */
+void mettreAJourBulles(Bulle *tab, int nb, float dt) { /* dt = temps écoulé en secondes */
+    int i;                                              /* Variable de boucle */
+    for (i = 0; i < nb; i++) {                         /* On parcourt toutes les bulles */
+        if (!tab[i].actif) continue;                   /* On saute les bulles inactives */
+        tab[i].x += tab[i].vx * dt * 60;              /* Déplacement horizontal fluide */
+        tab[i].y += tab[i].vy * dt * 60;              /* Déplacement vertical fluide */
+        if (tab[i].x <= 0 || tab[i].x >= LARGEUR_ECRAN) /* Si la bulle touche un bord gauche ou droit */
+            tab[i].vx *= -1;                             /* Rebond : on inverse la vitesse horizontale */
+        if (tab[i].y <= 0)    /* Si la bulle touche le plafond */
+            tab[i].vy *= -1;  /* Rebond : on inverse la vitesse verticale */
+        tab[i].vy += 3.0 * dt * 60; /* Gravité : la bulle accélère vers le bas */
     }
 }
 
-void diviserBulle(Bulle bulles[], int idx, int *nb) {  /* idx = indice de la bulle touchée, nb = nombre total de bulles */
-    if (bulles[idx].taille <= 1) {  /* Si c'est la plus petite taille... */
-        bulles[idx].actif = 0;      /* ...elle disparaît simplement */
-        return;                     /* On arrête la fonction ici */
+void diviserBulle(Bulle *tab, int *nb, int idx) { /* idx = indice de la bulle touchée */
+    if (tab[idx].taille <= 1) { /* Si c'est la plus petite taille */
+        tab[idx].actif = 0;     /* Elle disparaît simplement */
+        return;                  /* On arrête la fonction */
+    }
+    float vx_origine = tab[idx].vx; /* On mémorise la vitesse originale */
+    tab[idx].actif = 0;             /* La bulle touchée disparaît */
+
+    if (*nb < MAX_BULLES) {                               /* Première bulle fille */
+        tab[*nb].x = tab[idx].x;                         /* Même position x */
+        tab[*nb].y = tab[idx].y;                         /* Même position y */
+        tab[*nb].taille = tab[idx].taille - 1;           /* Une taille en moins */
+        tab[*nb].vx = (vx_origine > 0 ? 1 : -1) * 3.0; /* Part dans la direction d'origine */
+        tab[*nb].vy = -5.0;                               /* Repart vers le haut plus vite */
+        tab[*nb].actif = 1;                               /* La bulle est active */
+        (*nb)++;                                           /* On incrémente le nombre total */
     }
 
-    bulles[idx].actif = 0;  /* La bulle touchée disparaît */
-
-    /* Création de la première bulle fille (part vers la droite) */
-    bulles[*nb].x = bulles[idx].x;           /* Même position x que la bulle détruite */
-    bulles[*nb].y = bulles[idx].y;           /* Même position y que la bulle détruite */
-    bulles[*nb].taille = bulles[idx].taille - 1;  /* Une taille en moins */
-    bulles[*nb].vx = 3.0;                    /*Part vers la droite */
-    bulles[*nb].vy = -4.0;                   /* Repart vers le haut */
-    bulles[*nb].actif = 1;                   /* La nouvelle bulle est active */
-    (*nb)++;                                 /* On incrémente le nombre total de bulles */
-
-    /* Création de la deuxième bulle fille (part vers la gauche) */
-    bulles[*nb].x = bulles[idx].x;           /* Même position x que la bulle détruite */
-    bulles[*nb].y = bulles[idx].y;           /* Même position y que la bulle détruite */
-    bulles[*nb].taille = bulles[idx].taille - 1;  /* Une taille en moins */
-    bulles[*nb].vx = -3.0;                   /* Part vers la gauche */
-    bulles[*nb].vy = -4.0;                   /* Repart vers le haut */
-    bulles[*nb].actif = 1;                   /* La nouvelle bulle est active */
-    (*nb)++;                                 /* On incrémente à nouveau le nombre total de bulles */
+    if (*nb < MAX_BULLES) {                                /* Deuxième bulle fille */
+        tab[*nb].x = tab[idx].x;                          /* Même position x */
+        tab[*nb].y = tab[idx].y;                          /* Même position y */
+        tab[*nb].taille = tab[idx].taille - 1;            /* Une taille en moins */
+        tab[*nb].vx = (vx_origine > 0 ? -1 : 1) * 3.0;  /* Part dans la direction opposée */
+        tab[*nb].vy = -5.0;                                /* Repart vers le haut plus vite */
+        tab[*nb].actif = 1;                                /* La bulle est active */
+        (*nb)++;                                            /* On incrémente le nombre total */
+    }
 }
 
 /* =================== PROJECTILE =================== */
 
-void tirerProjectile(Projectile *p, Joueur *j) {  /* Reçoit le projectile et le joueur qui tire */
-    if (p->actif) return;  /* Si un tir est déjà en cours, on ne peut pas retirer */
-    p->x = j->x;           /* Le tir part de la position horizontale du joueur */
-    p->y = j->y;           /* Le tir part de la position verticale du joueur */
-    p->actif = 1;           /* Le projectile devient actif (visible à l'écran) */
+void tirer(Joueur *j, Projectile *proj) { /* Reçoit le joueur et le projectile */
+    if (proj->actif) return;              /* Si un tir est déjà en cours, on ne peut pas retirer */
+    proj->x = j->x;                       /* Le tir part de la position du joueur */
+    proj->y = j->y;                       /* Le tir part de la position du joueur */
+    proj->actif = 1;                       /* Le projectile devient actif */
 }
 
-void mettreAJourProjectile(Projectile *p) {  /* Reçoit le projectile à mettre à jour */
-    if (!p->actif) return;                   /* Si pas de tir en cours, rien à faire */
-
-    p->y -= VITESSE_PROJECTILE;  /* Le projectile monte (y diminue car 0 est en haut) */
-
-    if (p->y < 0)       /* Si le projectile sort par le haut de l'écran... */
-        p->actif = 0;   /* ...il disparaît */
+void mettreAJourProjectile(Projectile *proj, float dt) { /* dt = temps écoulé en secondes */
+    if (!proj->actif) return;                             /* Si pas de tir, rien à faire */
+    proj->y -= VITESSE_PROJECTILE * dt;                   /* Le projectile monte selon le temps */
+    if (proj->y < 0) proj->actif = 0;                    /* S'il sort par le haut il disparaît */
 }
