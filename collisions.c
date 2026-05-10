@@ -51,7 +51,7 @@ void gererCollisions(Partie *p) {
                 p->proj.actif = 0;                         /* Le projectile disparaît */
                 diviserBulle(p->bulles, &p->nb_bulles, i); /* La bulle se divise */
                 p->score += 100 * p->bulles[i].taille;     /* On gagne des points */
-                    }
+            }
         }
 
         /* Collision bulle / joueur */
@@ -62,48 +62,47 @@ void gererCollisions(Partie *p) {
                     p->joueur.x - 10, joueur_haut,
                     20, 60)) {
                 p->joueur.vivant = 0; /* Le joueur meurt */
-                    }
+            }
         }
     }
 
     /* ===== COLLISIONS AVEC LES ÉCLAIRS ===== */
     for (j = 0; j < MAX_ECLAIRS; j++) {
-        if (!p->eclairs[j].actif) continue;      /* On saute les inactifs */
-        if (!p->joueur.vivant) break;             /* Inutile si déjà mort */
-        if (p->eclairs[j].x > p->joueur.x - 30 &&  /* Zone plus large */
-        p->eclairs[j].x < p->joueur.x + 30 &&   /* Zone plus large */
-        p->eclairs[j].y > SCREEN_H - 150) {      /* Zone plus haute */ {    /* Au niveau du joueur */
+        if (!p->eclairs[j].actif) continue;     /* On saute les inactifs */
+        if (!p->joueur.vivant) break;            /* Inutile si déjà mort */
+        if (p->eclairs[j].x > p->joueur.x - 30 && /* Aligné horizontalement */
+            p->eclairs[j].x < p->joueur.x + 30 &&
+            p->eclairs[j].y > SCREEN_H - 150) {    /* Au niveau du joueur */
             p->joueur.vivant = 0;                   /* Le joueur est foudroyé */
         }
+    }
+
+    /* ===== COLLISIONS AVEC LE BOSS ===== */
+
+    /* Collision tir / boss */
+    if (p->boss.actif && p->proj.actif) {
+        if (collisionCercles(
+                p->proj.x, p->proj.y, 5,      /* Le projectile */
+                p->boss.x, p->boss.y, 40)) {   /* Le boss */
+            p->proj.actif = 0;                  /* Le tir disparaît */
+            p->boss.vie--;                       /* Le boss perd une vie */
+            p->score += 500;                     /* On gagne des points */
+            p->boss.etat = BOSS_HURT;           /* Animation de dégâts */
+            p->boss.timer_hurt = 30;            /* Durée de l'état hurt */
+            p->boss.vx = p->boss.vx * 1.3;    /* Le boss va plus vite */
+            if (p->boss.vie <= 0) {
+                p->boss.etat = BOSS_DIE;        /* Animation de mort */
+                p->boss.actif = 0;              /* Le boss est vaincu */
+            }
         }
+    }
 
-        /* ===== COLLISIONS AVEC LE BOSS ===== */
-
-        /* Collision tir / boss */
-        if (p->boss.actif && p->proj.actif) {
-            if (collisionCercles(
-                    p->proj.x, p->proj.y, 5,      /* Le projectile */
-                    p->boss.x, p->boss.y, 40)) {   /* Le boss */
-                p->proj.actif = 0;                  /* Le tir disparaît */
-                p->boss.vie--;                       /* Le boss perd une vie */
-                p->score += 500;                     /* On gagne des points */
-                p->boss.etat = BOSS_HURT;           /* Animation de dégâts */
-                p->boss.timer_hurt = 30;            /* Durée de l'état hurt */
-                p->boss.vx = p->boss.vx * 1.3;    /* Le boss va plus vite */
-                if (p->boss.vie <= 0) {
-                    p->boss.etat = BOSS_DIE;        /* Animation de mort */
-                    p->boss.actif = 0;              /* Le boss est vaincu */
-                }
-                    }
-        }
-
-        /* Collision boss / joueur */
-        if (p->boss.actif && p->joueur.vivant) {
-            if (collisionCercles(
-                    p->boss.x, p->boss.y, 40,          /* Le boss */
-                    p->joueur.x, SCREEN_H - 65, 15)) { /* Le joueur */
-                p->joueur.vivant = 0;                   /* Le joueur meurt */
-                    }
+    /* Collision boss / joueur */
+    if (p->boss.actif && p->joueur.vivant) {
+        if (collisionCercles(
+                p->boss.x, p->boss.y, 40,          /* Le boss */
+                p->joueur.x, SCREEN_H - 65, 15)) { /* Le joueur */
+            p->joueur.vivant = 0;                   /* Le joueur meurt */
         }
     }
 }
