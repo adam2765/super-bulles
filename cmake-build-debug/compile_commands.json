@@ -1,0 +1,44 @@
+[
+{
+  "directory": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug",
+  "command": "C:\\Users\\adamf\\Downloads\\MinGW\\bin\\gcc.exe -g -std=gnu99 -fdiagnostics-color=always -o CMakeFiles\\SuperBulles.dir\\main.c.obj -c C:\\Users\\adamf\\CLionProjects\\super-bulles\\main.c",
+  "file": "C:/Users/adamf/CLionProjects/super-bulles/main.c",
+  "output": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug/CMakeFiles/SuperBulles.dir/main.c.obj"
+},
+{
+  "directory": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug",
+  "command": "C:\\Users\\adamf\\Downloads\\MinGW\\bin\\gcc.exe -g -std=gnu99 -fdiagnostics-color=always -o CMakeFiles\\SuperBulles.dir\\jeu.c.obj -c C:\\Users\\adamf\\CLionProjects\\super-bulles\\jeu.c",
+  "file": "C:/Users/adamf/CLionProjects/super-bulles/jeu.c",
+  "output": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug/CMakeFiles/SuperBulles.dir/jeu.c.obj"
+},
+{
+  "directory": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug",
+  "command": "C:\\Users\\adamf\\Downloads\\MinGW\\bin\\gcc.exe -g -std=gnu99 -fdiagnostics-color=always -o CMakeFiles\\SuperBulles.dir\\entites.c.obj -c C:\\Users\\adamf\\CLionProjects\\super-bulles\\entites.c",
+  "file": "C:/Users/adamf/CLionProjects/super-bulles/entites.c",
+  "output": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug/CMakeFiles/SuperBulles.dir/entites.c.obj"
+},
+{
+  "directory": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug",
+  "command": "C:\\Users\\adamf\\Downloads\\MinGW\\bin\\gcc.exe -g -std=gnu99 -fdiagnostics-color=always -o CMakeFiles\\SuperBulles.dir\\input.c.obj -c C:\\Users\\adamf\\CLionProjects\\super-bulles\\input.c",
+  "file": "C:/Users/adamf/CLionProjects/super-bulles/input.c",
+  "output": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug/CMakeFiles/SuperBulles.dir/input.c.obj"
+},
+{
+  "directory": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug",
+  "command": "C:\\Users\\adamf\\Downloads\\MinGW\\bin\\gcc.exe -g -std=gnu99 -fdiagnostics-color=always -o CMakeFiles\\SuperBulles.dir\\affichage.c.obj -c C:\\Users\\adamf\\CLionProjects\\super-bulles\\affichage.c",
+  "file": "C:/Users/adamf/CLionProjects/super-bulles/affichage.c",
+  "output": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug/CMakeFiles/SuperBulles.dir/affichage.c.obj"
+},
+{
+  "directory": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug",
+  "command": "C:\\Users\\adamf\\Downloads\\MinGW\\bin\\gcc.exe -g -std=gnu99 -fdiagnostics-color=always -o CMakeFiles\\SuperBulles.dir\\collisions.c.obj -c C:\\Users\\adamf\\CLionProjects\\super-bulles\\collisions.c",
+  "file": "C:/Users/adamf/CLionProjects/super-bulles/collisions.c",
+  "output": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug/CMakeFiles/SuperBulles.dir/collisions.c.obj"
+},
+{
+  "directory": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug",
+  "command": "C:\\Users\\adamf\\Downloads\\MinGW\\bin\\gcc.exe -g -std=gnu99 -fdiagnostics-color=always -o CMakeFiles\\SuperBulles.dir\\sauvegarde.c.obj -c C:\\Users\\adamf\\CLionProjects\\super-bulles\\sauvegarde.c",
+  "file": "C:/Users/adamf/CLionProjects/super-bulles/sauvegarde.c",
+  "output": "C:/Users/adamf/CLionProjects/super-bulles/cmake-build-debug/CMakeFiles/SuperBulles.dir/sauvegarde.c.obj"
+}
+]
