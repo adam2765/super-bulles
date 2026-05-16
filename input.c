@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <string.h>  /* Pour strlen() */
 
+#include "affichage.h"
+
 void lireEntrees(Partie *p, int *quitter, float dt) {
     /* Reçoit toute la partie, le flag pour quitter et le temps écoulé */
 
@@ -32,9 +34,9 @@ void lireEntrees(Partie *p, int *quitter, float dt) {
         if (p->arme_active == 1) {       /* Si le joueur a l'arme rapide */
             /* Arme temporaire : on remet le projectile actif à 0 pour pouvoir retirer */
             p->proj.actif = 0;           /* On efface le tir précédent */
-            tirer(&p->joueur, &p->proj); /* On crée immédiatement un nouveau tir */
+            tirer(&p->joueur, &p->proj,son_laser); /* On crée immédiatement un nouveau tir */
         } else {                          /* Sinon on utilise l'arme de base */
-            tirer(&p->joueur, &p->proj); /* Un seul tir à la fois (tirer() vérifie si actif) */
+            tirer(&p->joueur, &p->proj,son_laser); /* Un seul tir à la fois (tirer() vérifie si actif) */
         }
     }
 

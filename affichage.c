@@ -1,4 +1,5 @@
 #include "affichage.h"  /* On importe les prototypes d'affichage */
+#include "sauvegarde.h"
 #include <stdio.h>      /* Pour sprintf() qui formate du texte */
 
 /* ===== COULEURS ===== */
@@ -129,7 +130,25 @@ void libererSpritesBoss() {
     for (i = 0; i < NB_HURT_BOSS; i++)   if (boss_hurt[i])   destroy_bitmap(boss_hurt[i]);   /* Libère hurt */
     if (boss_idle[0]) destroy_bitmap(boss_idle[0]);                                            /* Libère idle */
 }
+/* ===== SONS ===== */
+static SAMPLE *son_eclair = NULL; /* Son de l'éclair */
+SAMPLE *son_laser = NULL;    /* Son du tir */
+static SAMPLE *son_gameover = NULL; /* Son game over */
 
+void chargerSons() {
+    son_eclair = load_sample("sons/eclair_son.wav");
+    son_laser  = load_sample("sons/laser.wav");
+    son_gameover = load_sample("sons/gameover.wav");
+    if (!son_eclair) allegro_message("Erreur : eclair_son.wav non trouve !");
+    if (!son_laser)  allegro_message("Erreur : laser.wav non trouve !");
+}
+
+
+void libererSons() {
+    if (son_eclair) destroy_sample(son_eclair); /* On libère le son éclair */
+    if (son_laser)  destroy_sample(son_laser);  /* On libère le son laser */
+    if (son_gameover) destroy_sample(son_gameover); /* On libère le son game over */
+}
 /* ===== FONDS DE NIVEAU ===== */
 /* IMPORTANT : doit être déclaré AVANT dessinerFond qui l'utilise */
 static BITMAP *fonds[4]; /* Un fond par niveau */
@@ -338,6 +357,7 @@ static void dessinerProjectile(BITMAP *ecran, int x, int y) {
     rectfill(ecran, x - 2, y - 20, x + 2, y, JAUNE); /* Trait jaune vertical */
     circlefill(ecran, x, y - 20, 4, BLANC);           /* Pointe blanche en haut */
     circlefill(ecran, x, y - 20, 2, JAUNE);           /* Centre jaune de la pointe */
+
 }
 
 /* ===== ÉCRAN DE JEU ===== */
@@ -376,14 +396,19 @@ void afficherEcranJeu(BITMAP *buffer, Partie *p) {
         if (!p->eclairs[i].actif) continue;                             /* On saute les inactifs */
         num_frame = (p->eclairs[i].frame / 4) % NB_FRAMES_ECLAIR;     /* On avance l'animation */
         img = anim_eclair[num_frame];                                   /* On prend la bonne frame */
-        if (img)
+        if (img) {
             draw_sprite(buffer, img,
                 (int)p->eclairs[i].x - img->w/2, /* Centré sur x */
                 (int)p->eclairs[i].y);            /* Position y */
+            if (son_eclair && !p->eclairs[i].son_joue) {
+                play_sample(son_eclair, 200, 128, 1000, 0); /* On joue le son dès l'apparition */
+                p->eclairs[i].son_joue = 1;                 /* On marque comme joué */
+            }
+        }
     }
 
     /* Étape 6 : on dessine le boss au niveau 4 */
-    if (p->niveau == 4 && (p->boss.actif || p->boss.etat == BOSS_DIE))
+    if (p->niveau == 4 && p->boss.actif)
         dessinerBoss(buffer, p); /* On affiche le boss avec ses animations */
 
     /* Étape 7 : on dessine le joueur sur le sol */
@@ -520,7 +545,7 @@ void afficherRegles(BITMAP *buffer) {
 void afficherVictoire(BITMAP *buffer, int score) {
     int i;          /* Variable de boucle */
     int vert;       /* Composante verte pour le dégradé */
-    char texte[20]; /* Pour afficher le score */
+    char texte[30]; /* Pour afficher le score */
 
     for (i = 0; i < SCREEN_H; i++) {
         vert = (i * 40) / SCREEN_H;
@@ -534,6 +559,8 @@ void afficherVictoire(BITMAP *buffer, int score) {
         "Alex a sauve la Terre ! Les bulles sont vaincues !");
     sprintf(texte, "Score : %d", score);                                        /* Formatage du score */
     grand_texte(buffer, texte, SCREEN_W/2, SCREEN_H/2+20, JAUNE, 2);          /* Score en grand */
+    sprintf(texte, "Meilleur score : %d", chargerMeilleurScore());             /* Meilleur score */
+    grand_texte(buffer, texte, SCREEN_W/2, SCREEN_H/2+60, BLANC, 2);          /* Meilleur score en grand */
     grand_texte(buffer, "ENTREE pour continuer", SCREEN_W/2, SCREEN_H-40, GRIS_CLAIR, 2); /* Instruction */
     blit(buffer, screen, 0, 0, 0, 0, SCREEN_W, SCREEN_H); /* On affiche la victoire */
 }
@@ -542,6 +569,7 @@ void afficherVictoire(BITMAP *buffer, int score) {
 void afficherDefaite(BITMAP *buffer) {
     int i;     /* Variable de boucle */
     int rouge; /* Composante rouge pour le dégradé */
+    if (son_gameover) play_sample(son_gameover, 255, 128, 1000, 0);
 
     for (i = 0; i < SCREEN_H; i++) {
         rouge = (i * 35) / SCREEN_H;

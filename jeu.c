@@ -121,7 +121,7 @@ static void mettreAJourAnimation(Partie *p) {
 int lancerNiveau(Partie *p, int numero, BITMAP *buffer) {
     int i;            /* Variable de boucle */
     int quitter = 0;  /* Devient 1 quand on doit sortir de la boucle */
-    float dt = 0.016; /* Temps entre deux images (~60 images par seconde) */
+    float dt = 0.013; /* Temps entre deux images (~60 images par seconde) */
     int j;            /* Variable de boucle pour les éclairs */
 
     /* On prépare le niveau */
@@ -179,12 +179,21 @@ int lancerNiveau(Partie *p, int numero, BITMAP *buffer) {
         if (p->boss.actif)
             mettreAJourBoss(&p->boss, dt); /* On déplace le boss */
 
-        /* 6. Le boss lâche une bulle toutes les 3 secondes */
-        if (p->boss.actif && p->frame % 180 == 0 && p->boss.etat != BOSS_HURT)
+        if (p->boss.actif && p->frame % 180 == 0 && p->boss.etat != BOSS_HURT) {
             ajouterBulle(p->bulles, &p->nb_bulles,
                 p->boss.x,        /* La bulle part de la position x du boss */
                 p->boss.y + 30,   /* La bulle part du bas du boss */
                 1);               /* Petite bulle */
+            p->boss.etat = BOSS_ATTACK; /* Animation attaque quand il lance une bulle */
+        }
+        /* Si le boss est mort on attend la fin de son animation puis on le cache */
+        if (p->boss.etat == BOSS_DIE) {
+            p->boss.frame++;                          /* On avance l'animation de mort */
+            if (p->boss.frame > 60) {                /* Après 60 frames d'animation */
+                p->boss.etat = BOSS_IDLE;            /* On arrête d'afficher le boss */
+                p->boss.actif = 0;                   /* On le désactive complètement */
+            }
+        }
 
         /* 7. On déplace le projectile */
         mettreAJourProjectile(&p->proj, dt);
@@ -248,25 +257,28 @@ void boucleJeu(Partie *p, BITMAP *buffer) {
 
     while (p->niveau <= NB_NIVEAUX) {        /* On joue les niveaux un par un */
         resultat = lancerNiveau(p, p->niveau, buffer); /* On lance le niveau en cours */
-
         if (resultat == 1) {
-            afficherVictoire(buffer, p->score);   /* Écran de victoire du niveau */
-            sauvegarder(p->pseudo, p->niveau);    /* On sauvegarde la progression */
-            clear_keybuf();                        /* On vide le buffer clavier */
-            readkey();                             /* On attend une touche */
-            p->niveau++;                           /* On passe au niveau suivant */
-        } else {
+            sauvegarderMeilleurScore(p->score);          /* On sauvegarde d'abord le record */
+            afficherVictoire(buffer, p->score);          /* Puis on affiche avec le bon meilleur score */
+            p->niveau++;                                  /* On passe au niveau suivant */
+            sauvegarder(p->pseudo, p->niveau);           /* On sauvegarde la progression */
+            clear_keybuf();                               /* On vide le buffer clavier */
+            readkey();                                    /* On attend une touche */
+        }
+
+        else {
             /* Le joueur a perdu — on lui demande s'il veut recommencer */
             afficherDefaite(buffer);   /* On affiche l'écran de défaite */
             clear_keybuf();             /* On vide le buffer clavier */
 
-            /* On affiche le choix en bas de l'écran */
-            textprintf_centre_ex(buffer, font, SCREEN_W/2, SCREEN_H - 60,
-                makecol(255, 255, 0), -1, "R = Recommencer    ECHAP = Menu");
-            blit(buffer, screen, 0, 0, 0, 0, SCREEN_W, SCREEN_H); /* On affiche */
+            afficherDefaite(buffer);
+            clear_keybuf();
 
+            int choix = readkey() >> 8;
+            if (choix != KEY_R)
+                return;
             /* On lit le choix du joueur */
-            int choix = readkey() >> 8; /* On attend une touche */
+             choix = readkey() >> 8; /* On attend une touche */
 
             if (choix != KEY_R)         /* Si ce n'est pas R */
                 return;                  /* On retourne au menu */
@@ -275,6 +287,7 @@ void boucleJeu(Partie *p, BITMAP *buffer) {
     }
 
     afficherVictoire(buffer, p->score); /* Victoire finale après tous les niveaux */
+    sauvegarderMeilleurScore(p->score); /* On sauvegarde si c'est un record */
     clear_keybuf();                      /* On vide le buffer clavier */
     readkey();                           /* On attend une touche */
 }

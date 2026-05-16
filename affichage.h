@@ -41,4 +41,9 @@ void afficherDefaite(BITMAP *buffer);               /* Affiche l'écran de défa
 void afficherDecompte(BITMAP *buffer, int chiffre,int niveau); /* Affiche le décompte 3-2-1 */
 void chargerFonds();  /* Charge les fonds de niveau */
 void libererFonds();  /* Libère les fonds de niveau */
+
+void chargerSons();
+void libererSons();
+extern SAMPLE *son_laser;
+
 #endif

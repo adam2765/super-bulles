@@ -15,5 +15,7 @@
 
 int sauvegarder(char *pseudo, int niveau);   /* Écrit pseudo + niveau dans le fichier */
 int chargerSauvegarde(char *pseudo);         /* Lit le niveau associé au pseudo, -1 si absent */
+int sauvegarderMeilleurScore(int score); /* Sauvegarde le meilleur score */
+int chargerMeilleurScore();              /* Charge le meilleur score */
 
 #endif

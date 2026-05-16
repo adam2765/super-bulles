@@ -6,7 +6,7 @@
  *   liées au joueur, aux bulles et aux projectiles
  * - Inclure ce fichier dans tous les autres modules
  */
-
+#include<allegro.h>
 #ifndef ENTITES_H                /* Protection contre les inclusions en double */
 #define ENTITES_H
 
@@ -55,6 +55,7 @@ typedef struct {
     float x, y;     /* Position de l'éclair */
     int actif;       /* 1 = visible, 0 = inactif */
     int frame;       /* Compteur d'animation */
+    int son_joue;
 } Eclair;
 
 typedef struct {
@@ -94,7 +95,7 @@ void mettreAJourBulles(Bulle *tab, int nb, float dt);
 void diviserBulle(Bulle *tab, int *nb, int idx);
 
 /* ===== PROTOTYPES PROJECTILE ===== */
-void tirer(Joueur *j, Projectile *proj);
+void tirer(Joueur *j, Projectile *proj, SAMPLE *son_laser);
 void mettreAJourProjectile(Projectile *proj, float dt);
 
 /* ===== PROTOTYPES ECLAIRS ===== */

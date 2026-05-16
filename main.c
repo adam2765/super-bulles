@@ -13,7 +13,8 @@ int main() {
 
     /* Initialisation d'Allegro */
     allegro_init();                                          /* On initialise la librairie Allegro */
-    install_keyboard();                                      /* On active la gestion du clavier */
+    install_keyboard();   /* On active la gestion du clavier */
+    install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL); /* POUR LE SON*/
     set_color_depth(32);                                     /* Profondeur de couleur 32 bits */
     set_gfx_mode(GFX_AUTODETECT_WINDOWED, 800, 600, 0, 0);  /* Fenêtre 800x600 */
     set_window_title("Super Bulles");                        /* Titre de la fenêtre */
@@ -23,6 +24,8 @@ int main() {
     chargerSpritesEclair();                      /* On charge les sprites de l'éclair */
     chargerSpritesBoss();                        /* On charge les sprites du boss */
     chargerFonds();         /* On charge les fonds de niveau */
+    chargerSons(); /* après chargerFonds() */
+
 
     /* Écran d'intro avec l'histoire */
     afficherIntro(buffer);                       /* On affiche l'écran d'intro */
@@ -76,6 +79,7 @@ int main() {
     libererSpritesEclair(); /* On libère les sprites de l'éclair */
     libererSpritesBoss();   /* On libère les sprites du boss */
     libererFonds();         /* On libère les fonds de niveau */
+    libererSons();
 
     destroy_bitmap(buffer); /* On libère le buffer */
     allegro_exit();         /* On ferme Allegro proprement */

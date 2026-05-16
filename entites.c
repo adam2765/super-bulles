@@ -34,8 +34,8 @@ void ajouterBulle(Bulle *tab, int *nb, float x, float y, int taille) {
     tab[*nb].x = x;                  /* Position horizontale */
     tab[*nb].y = y;                  /* Position verticale */
     tab[*nb].taille = taille;        /* Taille de la bulle */
-    tab[*nb].vx = 0.3 * taille;     /* Vitesse horizontale très réduite */
-    tab[*nb].vy = -0.4 * taille;    /* Vitesse verticale très réduite vers le haut */
+    tab[*nb].vx = 0.2 * taille;     /* Vitesse horizontale très réduite */
+    tab[*nb].vy = -0.3 * taille;    /* Vitesse verticale très réduite vers le haut */
     tab[*nb].actif = 1;              /* La bulle est active */
     (*nb)++;                          /* On incrémente le nombre total de bulles */
 }
@@ -69,6 +69,8 @@ void mettreAJourBulles(Bulle *tab, int nb, float dt) {
         if (tab[i].y + rayon_bulle >= sol) {           /* Si le bas de la bulle touche le sol */
             tab[i].y = sol - rayon_bulle;              /* On repositionne au-dessus du sol */
             tab[i].vy = tab[i].vy * -1;               /* On inverse la vitesse : rebond ! */
+            if (tab[i].vy < -10.0 * tab[i].taille)     /* Si la bulle monte trop vite */
+                tab[i].vy = -10.0 * tab[i].taille;     /* On plafonne la vitesse */
         }
     }
 }
@@ -115,11 +117,14 @@ void diviserBulle(Bulle *tab, int *nb, int idx) {
 
 /* =================== PROJECTILE =================== */
 
-void tirer(Joueur *j, Projectile *proj) {
+void tirer(Joueur *j, Projectile *proj,SAMPLE *son_laser) {
     if (proj->actif) return;    /* Si un tir est déjà en cours, on ne peut pas retirer */
     proj->x = j->x;             /* Le tir part de la position x du joueur */
     proj->y = j->y;             /* Le tir part de la position y du joueur */
     proj->actif = 1;             /* Le projectile devient actif */
+    if (son_laser)
+        play_sample(son_laser, 150, 128, 1000, 0);    /* On joue le son au moment du tir */
+
 }
 
 void mettreAJourProjectile(Projectile *proj, float dt) {
@@ -135,7 +140,8 @@ void lancerEclair(Eclair eclairs[], float x, float y) {
     for (i = 0; i < MAX_ECLAIRS; i++) {  /* On cherche un slot libre */
         if (!eclairs[i].actif) {          /* Si ce slot est libre */
             eclairs[i].x = x;            /* Position x de la bulle */
-            eclairs[i].y = y;            /* Position y de la bulle */
+            eclairs[i].y = y; /* Position y de la bulle */
+            eclairs[i].son_joue = 0;
             eclairs[i].actif = 1;        /* L'éclair est actif */
             eclairs[i].frame = 0;        /* On repart de la première frame */
             return;                       /* On sort */
@@ -149,7 +155,7 @@ void mettreAJourEclairs(Eclair eclairs[], float dt) {
         if (!eclairs[i].actif) continue;     /* On saute les inactifs */
         eclairs[i].y += 250.0 * dt;          /* L'éclair tombe vers le bas */
         eclairs[i].frame++;                   /* On avance l'animation */
-        if (eclairs[i].y > SCREEN_H - 35)   /* Si l'éclair touche le sol */
+        if (eclairs[i].y > SCREEN_H - 250)   /* Si l'éclair touche le sol */
             eclairs[i].actif = 0;            /* Il disparaît */
     }
 }
@@ -189,13 +195,19 @@ void mettreAJourBoss(Boss *boss, float dt) {
     if (boss->x <= 50) {
         boss->x = 50;                   /* On repositionne */
         boss->vx = boss->vx * -1;      /* On inverse la direction */
-        boss->etat = BOSS_ATTACK;      /* On déclenche l'animation d'attaque */
+        boss->etat = BOSS_IDLE;      /* On déclenche l'animation d'attaque */
     }
 
     /* Rebond sur le bord droit */
     if (boss->x >= LARGEUR_ECRAN - 50) {
         boss->x = LARGEUR_ECRAN - 50;  /* On repositionne */
         boss->vx = boss->vx * -1;      /* On inverse la direction */
-        boss->etat = BOSS_ATTACK;      /* On déclenche l'animation d'attaque */
+        boss->etat = BOSS_IDLE;      /* On déclenche l'animation d'attaque */
+    }
+    /* Le boss descend lentement vers le joueur */
+    if (boss->y < HAUTEUR_ECRAN - 200) {    /* Si le boss est trop haut */
+        boss->y += 0.5 * dt * 60;           /* Il descend doucement */
+    } else {                                 /* Si le boss est trop bas */
+        boss->y -= 0.5 * dt * 60;           /* Il remonte */
     }
 }

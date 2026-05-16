@@ -60,3 +60,33 @@ int chargerSauvegarde(char *pseudo) { /* Reçoit le pseudo à rechercher */
     fclose(f);  /* On ferme le fichier */
     return -1;  /* Pseudo non trouvé : retourne -1 */
 }
+int sauvegarderMeilleurScore(int score) {
+    FILE *f;                              /* Pointeur vers le fichier */
+    int meilleur = 0;                     /* Meilleur score actuel */
+
+    f = fopen("meilleur_score.txt", "r"); /* On lit le score actuel */
+    if (f) {
+        fscanf(f, "%d", &meilleur);       /* On lit le meilleur score */
+        fclose(f);                         /* On ferme le fichier */
+    }
+
+    if (score > meilleur) {               /* Si le nouveau score est meilleur */
+        f = fopen("meilleur_score.txt", "w"); /* On ouvre en écriture */
+        if (!f) return -1;                 /* Erreur */
+        fprintf(f, "%d\n", score);         /* On sauvegarde le nouveau meilleur */
+        fclose(f);                          /* On ferme le fichier */
+    }
+    return 0; /* Succès */
+}
+
+int chargerMeilleurScore() {
+    FILE *f;          /* Pointeur vers le fichier */
+    int meilleur = 0; /* Meilleur score par défaut */
+
+    f = fopen("meilleur_score.txt", "r"); /* On ouvre le fichier */
+    if (f) {
+        fscanf(f, "%d", &meilleur); /* On lit le meilleur score */
+        fclose(f);                   /* On ferme le fichier */
+    }
+    return meilleur; /* On retourne le meilleur score */
+}
